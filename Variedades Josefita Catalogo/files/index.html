@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Variedades Josefita</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Grupo 4: Enlace al archivo CSS externo -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar">
+        <p class="sidebar-section-title">👕 Categorías</p>
+        <button
+          class="sidebar-btn active"
+          onclick="filterCategory('todos', this)"
+        >
+          Todos
+        </button>
+        <button class="sidebar-btn" onclick="filterCategory('camisetas', this)">
+          👕 Camisetas
+        </button>
+        <button
+          class="sidebar-btn"
+          onclick="filterCategory('deportivas', this)"
+        >
+          ⚽ Deportivas
+        </button>
+        <button class="sidebar-btn" onclick="filterCategory('polos', this)">
+          👔 Polos
+        </button>
+        <button class="sidebar-btn" onclick="filterCategory('blusas', this)">
+          👗 Blusas
+        </button>
+
+        <hr class="sidebar-divider" />
+
+        <p class="sidebar-section-title">Secciones</p>
+        <button class="sidebar-btn">👤 Sobre nosotros</button>
+        <button class="sidebar-btn">📄 Términos y condiciones</button>
+
+        <hr class="sidebar-divider" />
+
+        <p class="sidebar-section-title">Contacto</p>
+        <div class="contact-info">
+          📞 <a href="tel:+573001234567">+57 300 123 4567</a><br />
+          ✉️ <a href="mailto:info@josefita.com">info@josefita.com</a>
+        </div>
+      </aside>
+
+      <!-- ===== HEADER ===== -->
+      <header>
+        <div class="brand">Variedades Josefita</div>
+        <div class="header-right">
+          <!-- Botón favoritos con contador -->
+          <div class="fav-wrapper">
+            <button
+              class="icon-btn"
+              id="fav-header-btn"
+              title="Mis favoritos"
+              onclick="toggleFavPanel()"
+            >
+              🤍
+              <span class="fav-count" id="fav-count" style="display: none"
+                >0</span
+              >
+            </button>
+            <!-- Panel desplegable de favoritos -->
+            <div class="fav-panel" id="fav-panel">
+              <p class="fav-panel-title">Mis Favoritos</p>
+              <div id="fav-panel-list"></div>
+              <p class="fav-panel-empty" id="fav-panel-empty">
+                No tienes favoritos aún.
+              </p>
+            </div>
+          </div>
+
+          <button class="login-btn" id="login-btn" onclick="handleLoginBtn()">
+            → Iniciar sesión
+          </button>
+        </div>
+      </header>
+
+      <!-- ===== MAIN ===== -->
+      <main>
+        <div class="filter-tabs">
+          <button
+            class="filter-tab active"
+            onclick="filterGender('todos', this)"
+          >
+            Todos
+          </button>
+          <button class="filter-tab" onclick="filterGender('hombres', this)">
+            Hombres
+          </button>
+          <button class="filter-tab" onclick="filterGender('mujeres', this)">
+            Mujeres
+          </button>
+        </div>
+
+        <h2 class="section-title" id="section-title">Todos los Productos</h2>
+        <p class="section-subtitle" id="product-count"></p>
+        <div class="products-grid" id="products-grid"></div>
+      </main>
+    </div>
+
+    <!-- ===== MODAL LOGIN ===== -->
+    <div
+      class="modal-overlay"
+      id="modal-overlay"
+      onclick="closeModalOutside(event)"
+    >
+      <div class="modal">
+        <div class="modal-title">Iniciar Sesión</div>
+        <p class="modal-sub">
+          Inicia sesión para guardar tus productos favoritos
+        </p>
+
+        <div class="form-group">
+          <label>Usuario</label>
+          <input
+            type="text"
+            id="input-user"
+            placeholder="usuario"
+            autocomplete="off"
+          />
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input
+            type="password"
+            id="input-pass"
+            placeholder="••••••••"
+            onkeydown="if (event.key === 'Enter') submitLogin();"
+          />
+        </div>
+
+        <p class="modal-error" id="modal-error"></p>
+
+        <div class="modal-actions">
+          <button class="btn-submit" onclick="submitLogin()">Entrar</button>
+          <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Grupo 4: Enlace al archivo JavaScript externo -->
+    <script src="script.js"></script>
+  </body>
+</html>
