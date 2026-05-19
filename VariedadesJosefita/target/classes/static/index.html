@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Variedades Josefita</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <aside class="sidebar">
+        <p class="sidebar-section-title">Categorias</p>
+        <button class="sidebar-btn active" onclick="filterCategory('todos', this)">Todos</button>
+        <button class="sidebar-btn" onclick="filterCategory('camisetas', this)">Camisetas</button>
+        <button class="sidebar-btn" onclick="filterCategory('deportivas', this)">Deportivas</button>
+        <button class="sidebar-btn" onclick="filterCategory('polos', this)">Polos</button>
+        <button class="sidebar-btn" onclick="filterCategory('blusas', this)">Blusas</button>
+
+        <hr class="sidebar-divider" />
+        <p class="sidebar-section-title">Secciones</p>
+        <button class="sidebar-btn">Sobre nosotros</button>
+        <button class="sidebar-btn">Terminos y condiciones</button>
+
+        <hr class="sidebar-divider" />
+        <p class="sidebar-section-title">Contacto</p>
+        <div class="contact-info">
+          +57 300 123 4567<br />
+          info@josefita.com
+        </div>
+
+        <hr class="sidebar-divider" />
+        <div id="admin-sidebar" class="admin-section" style="display:none">
+          <p class="sidebar-section-title">Administracion</p>
+          <button class="sidebar-btn admin-btn" onclick="openAddModal()">+ Agregar Producto</button>
+        </div>
+      </aside>
+
+      <header>
+        <div class="brand">Variedades Josefita</div>
+        <div class="header-right">
+          <button class="login-btn" id="login-btn" onclick="handleLoginBtn()">Iniciar sesion</button>
+        </div>
+      </header>
+
+      <main>
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterGender('todos', this)">Todos</button>
+          <button class="filter-tab" onclick="filterGender('hombres', this)">Hombres</button>
+          <button class="filter-tab" onclick="filterGender('mujeres', this)">Mujeres</button>
+        </div>
+
+        <h2 class="section-title" id="section-title">Todos los Productos</h2>
+        <p class="section-subtitle" id="product-count"></p>
+        <div class="products-grid" id="products-grid"></div>
+      </main>
+    </div>
+
+    <!-- Modal Login -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+      <div class="modal">
+        <div class="modal-title">Iniciar Sesion</div>
+        <p class="modal-sub">Inicia sesion para administrar productos</p>
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" id="input-user" placeholder="usuario" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Contrasena</label>
+          <input type="password" id="input-pass" placeholder="********" onkeydown="if (event.key === 'Enter') submitLogin();" />
+        </div>
+        <p class="modal-error" id="modal-error"></p>
+        <div class="modal-actions">
+          <button class="btn-submit" onclick="submitLogin()">Entrar</button>
+          <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Producto (Agregar/Editar) -->
+    <div class="modal-overlay" id="modal-producto-overlay" onclick="closeModalOutside(event)">
+      <div class="modal modal-producto">
+        <div class="modal-title" id="modal-producto-title">Agregar Producto</div>
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="prod-nombre" placeholder="Nombre del producto" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Talla</label>
+            <input type="text" id="prod-talla" placeholder="Ej: M, L, XL" />
+          </div>
+          <div class="form-group">
+            <label>Color</label>
+            <input type="text" id="prod-color" placeholder="Ej: Rojo" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Precio</label>
+            <input type="number" id="prod-precio" placeholder="Ej: 50000" />
+          </div>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="prod-categoria">
+              <option value="camisetas">Camisetas</option>
+              <option value="deportivas">Deportivas</option>
+              <option value="polos">Polos</option>
+              <option value="blusas">Blusas</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Genero</label>
+            <select id="prod-genero">
+              <option value="hombres">Hombres</option>
+              <option value="mujeres">Mujeres</option>
+              <option value="unisex">Unisex</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>URL Imagen</label>
+            <input type="text" id="prod-imagen" placeholder="https://..." />
+          </div>
+        </div>
+        <p class="modal-error" id="modal-producto-error"></p>
+        <div class="modal-actions">
+          <button class="btn-submit" id="btn-guardar-producto" onclick="guardarProducto()">Guardar</button>
+          <button class="btn-cancel" onclick="cerrarModalProducto()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Confirmar Eliminar -->
+    <div class="modal-overlay" id="modal-confirmar-overlay" onclick="closeModalOutside(event)">
+      <div class="modal modal-small">
+        <div class="modal-title">Eliminar Producto</div>
+        <p id="confirmar-mensaje">Esta seguro de eliminar este producto?</p>
+        <div class="modal-actions">
+          <button class="btn-submit btn-danger" onclick="confirmarEliminar()">Eliminar</button>
+          <button class="btn-cancel" onclick="cerrarConfirmar()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
