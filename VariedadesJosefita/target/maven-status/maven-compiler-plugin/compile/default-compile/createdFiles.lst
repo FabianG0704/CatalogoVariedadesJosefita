@@ -1,0 +1,13 @@
+com\variedadesjosefita\config\CorsConfig.class
+com\variedadesjosefita\model\Prenda.class
+com\variedadesjosefita\VariedadesJosefitaApplication.class
+com\variedadesjosefita\config\SecurityConfig.class
+com\variedadesjosefita\service\PrendaService.class
+com\variedadesjosefita\controller\PrendaController.class
+com\variedadesjosefita\repository\PrendaRepository.class
+com\variedadesjosefita\model\Usuario.class
+com\variedadesjosefita\config\CorsConfig$1.class
+com\variedadesjosefita\repository\UsuarioRepository.class
+com\variedadesjosefita\controller\AuthController.class
+com\variedadesjosefita\dto\LoginRequest.class
+com\variedadesjosefita\service\UsuarioService.class
