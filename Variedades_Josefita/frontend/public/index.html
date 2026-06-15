@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Variedades Josefita</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar">
+        <p class="sidebar-section-title">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <path d="M3 9h18M9 21V9" />
+          </svg>
+          Categorías
+        </p>
+        <button
+          class="sidebar-btn active"
+          onclick="filterCategory('todos', this)"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v8M8 12h8" />
+          </svg>
+          Todos
+        </button>
+        <button class="sidebar-btn" onclick="filterCategory('camisetas', this)">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 6l3-3 6 3 6-3 3 3-4 4v9H7V10L3 6z" />
+          </svg>
+          Camisetas
+        </button>
+        <button
+          class="sidebar-btn"
+          onclick="filterCategory('deportivas', this)"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path
+              d="M4.5 9.5C7 8 9.5 8.5 12 10s5 2.5 7.5 1M4.5 14.5C7 16 9.5 15.5 12 14s5-2.5 7.5-1"
+            />
+          </svg>
+          Deportivas
+        </button>
+        <button class="sidebar-btn" onclick="filterCategory('polos', this)">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 6l3-3 6 3 6-3 3 3-4 4v9H7V10L3 6z" />
+            <path d="M9 6v4" />
+          </svg>
+          Polos
+        </button>
+        <button class="sidebar-btn" onclick="filterCategory('blusas', this)">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 2L2 6l4 4v12h12V10l4-4-4-4c-2 2-4 3-6 3S8 4 6 2z" />
+          </svg>
+          Blusas
+        </button>
+
+        <hr class="sidebar-divider" />
+
+        <p class="sidebar-section-title">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 6h16M4 12h10M4 18h7" />
+          </svg>
+          Secciones
+        </p>
+        <a href="nosotros.html" class="sidebar-btn">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+          </svg>
+          Sobre nosotros
+        </a>
+
+        <hr class="sidebar-divider" />
+
+        <p class="sidebar-section-title">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M22 16.92V19a2 2 0 01-2.18 2A19.79 19.79 0 013 5.18 2 2 0 015 3h2.08a2 2 0 012 1.72 12.5 12.5 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 10.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.5 12.5 0 002.81.7A2 2 0 0122 17.92z"
+            />
+          </svg>
+          Contacto
+        </p>
+        <div class="contact-info">
+          <a href="tel:+584149772512">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M22 16.92V19a2 2 0 01-2.18 2A19.79 19.79 0 013 5.18 2 2 0 015 3h2.08a2 2 0 012 1.72 12.5 12.5 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 10.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.5 12.5 0 002.81.7A2 2 0 0122 17.92z"
+              />
+            </svg>
+            +58 414-9772512
+          </a>
+        </div>
+      </aside>
+
+      <!-- ===== HEADER ===== -->
+      <header>
+        <div class="brand">Variedades Josefita</div>
+        <div class="header-right">
+          <div class="fav-wrapper">
+            <button
+              class="icon-btn"
+              id="fav-header-btn"
+              title="Mis favoritos"
+              onclick="toggleFavPanel()"
+            >
+              <!-- Heart icon -->
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
+                />
+              </svg>
+              <span class="fav-count" id="fav-count" style="display: none"
+                >0</span
+              >
+            </button>
+            <div class="fav-panel" id="fav-panel">
+              <p class="fav-panel-title">Mis Favoritos</p>
+              <div id="fav-panel-list"></div>
+              <p class="fav-panel-empty" id="fav-panel-empty">
+                No tienes favoritos aún.
+              </p>
+            </div>
+          </div>
+
+          <button class="login-btn" id="login-btn" onclick="handleLoginBtn()">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"
+              />
+            </svg>
+            Iniciar sesión
+          </button>
+        </div>
+      </header>
+
+      <!-- ===== MAIN ===== -->
+      <main>
+        <div class="filter-tabs">
+          <button
+            class="filter-tab active"
+            onclick="filterGender('todos', this)"
+          >
+            Todos
+          </button>
+          <button class="filter-tab" onclick="filterGender('hombres', this)">
+            Hombres
+          </button>
+          <button class="filter-tab" onclick="filterGender('mujeres', this)">
+            Mujeres
+          </button>
+        </div>
+
+        <h2 class="section-title" id="section-title">Todos los Productos</h2>
+        <p class="section-subtitle" id="product-count"></p>
+        <div class="products-grid" id="products-grid"></div>
+      </main>
+    </div>
+
+    <!-- ===== MODAL LOGIN / REGISTRO ===== -->
+    <div
+      class="modal-overlay"
+      id="modal-overlay"
+      onclick="closeModalOutside(event)"
+    >
+      <div class="modal">
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
