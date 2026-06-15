@@ -1,0 +1,27 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IntelliJ / NetBeans
+.idea/
+*.iws
+*.iml
+*.ipr
+nb-configuration.xml
+nbproject/
+
+# Imágenes subidas por usuarios (no van al repo)
+backend/imagenes/
+imagenes/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase
+.firebase/

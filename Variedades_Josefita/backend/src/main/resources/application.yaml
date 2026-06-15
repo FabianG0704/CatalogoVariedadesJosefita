@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/bdjosefita
-    username: postgres
-    password: Ol4kases
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bdjosefita}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:Ol4kases}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -16,9 +16,8 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
-# Ruta donde se guardarán las fotos de las prendas
-# Windows: app.imagenes.ruta: C:/josefita/imagenes
-# Linux/Mac: app.imagenes.ruta: /var/josefita/imagenes
+# En local usa ./imagenes (carpeta al lado del JAR)
+# En Render/Docker usa /app/imagenes (creada en el Dockerfile)
 app:
   imagenes:
-    ruta: ./imagenes
+    ruta: ${IMAGENES_RUTA:./imagenes}
