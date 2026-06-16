@@ -1,6 +1,7 @@
 // =============================================
 // URL BASE DEL BACKEND (Spring Boot)
 // =============================================
+const API_URL = "http://localhost:8080";
 
 // =============================================
 // SESIÓN
@@ -40,18 +41,17 @@ async function cargarPrendas() {
     if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
     const prendas = await res.json();
 
-    products = prendas.map(p => ({
-    id:       p.id,
-    name:     p.nombre,
-    price:    formatearPrecio(p.precio),
-    category: inferirCategoria(p.nombre),
-    gender:   GENERO_MAP[p.sexo?.descripcion] ?? "todos",
-    img:      p.imagen ? `${API_URL}/imagenes/${p.imagen}` : null,
-    talla:    p.talla,
-    color:    p.color,
-    fav:      false,
-    agotado:  p.status?.id === 0  // ← nuevo campo
-}));
+    products = prendas.filter(p => p.status?.id !== 0).map(p => ({
+      id:       p.id,
+      name:     p.nombre,
+      price:    formatearPrecio(p.precio),
+      category: inferirCategoria(p.nombre),
+      gender:   GENERO_MAP[p.sexo?.descripcion] ?? "todos",
+      img:      p.imagen ? `${API_URL}/imagenes/${p.imagen}` : null,
+      talla: p.talla,
+      color: p.color,
+      fav:      false
+    }));
 
     renderProducts();
   } catch (err) {
@@ -133,10 +133,7 @@ function renderProducts() {
                <span style="font-size:2rem;">📷</span> Sin foto
              </div>`
         }
-        ${p.agotado
-          ? `<span class="product-badge" style="background: rgba(120,120,120,0.6);">Agotado</span>`
-          : `<span class="product-badge">${categoryLabels[p.category] ?? p.category}</span>`
-        }
+        <span class="product-badge">${categoryLabels[p.category] ?? p.category}</span>
 
         ${esAdmin ? `
         <div class="upload-overlay" id="overlay-${p.id}">
@@ -156,13 +153,13 @@ function renderProducts() {
         <button class="btn-fav ${p.fav ? "active" : ""}"
           title="${currentUser ? "Guardar en favoritos" : "Inicia sesión para guardar favoritos"}"
           onclick="toggleFav(${p.id})">
-          ${p.fav ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="#c47fa0" stroke="#c47fa0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>` : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`}
+          ${p.fav ? "❤️" : "🤍"}
         </button>
         ${esAdmin ? `
         <button class="btn-upload" style="font-size:.8rem;padding:.3rem .7rem;"
           onclick="abrirModalEditarProducto(${p.id})">✏️ Editar</button>
         <button class="btn-upload" style="font-size:.8rem;padding:.3rem .7rem;background:#c0392b;"
-          onclick="confirmarEliminar(${p.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Eliminar</button>
+          onclick="confirmarEliminar(${p.id})">🗑️ Eliminar</button>
         ` : ""}
       </div>
     </div>
@@ -271,7 +268,7 @@ async function toggleFav(id) {
     p.fav = nuevoEstado;
     renderProducts();
     updateFavPanel();
-    showToast(p.fav ? "Añadido a favoritos" : "Eliminado de favoritos");
+    showToast(p.fav ? "❤️ Añadido a favoritos" : "🤍 Eliminado de favoritos");
   } catch (err) {
     showToast("❌ Error al actualizar favoritos");
   }
@@ -291,8 +288,8 @@ function updateFavPanel() {
   const btnEl   = document.getElementById("fav-header-btn");
 
   btnEl.innerHTML = favProducts.length > 0
-    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="#c47fa0" stroke="#c47fa0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> <span class="fav-count" id="fav-count">${favProducts.length}</span>`
-    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> <span class="fav-count" id="fav-count" style="display:none">0</span>`;
+    ? `❤️ <span class="fav-count" id="fav-count">${favProducts.length}</span>`
+    : `🤍 <span class="fav-count" id="fav-count" style="display:none">0</span>`;
 
   if (favProducts.length === 0) {
     listEl.innerHTML = "";
@@ -308,7 +305,7 @@ function updateFavPanel() {
         <p class="fav-item-name">${p.name}</p>
         <p class="fav-item-price">${p.price}</p>
       </div>
-      <button class="fav-item-remove" onclick="removeFav(${p.id})" title="Quitar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="fav-item-remove" onclick="removeFav(${p.id})" title="Quitar">✕</button>
     </div>
   `).join("");
 }
@@ -784,7 +781,7 @@ function confirmarEliminar(id) {
   const p = products.find(x => x.id === id);
   const body = document.getElementById("modal-body");
   body.innerHTML = `
-    <div class="modal-title">Eliminar producto</div>
+    <div class="modal-title">🗑️ Eliminar producto</div>
     <p style="text-align:center;margin:1rem 0;">
       ¿Segura que deseas eliminar <strong>${p.name}</strong>?<br>
       <span style="color:#888;font-size:.9rem;">Esta acción no se puede deshacer.</span>
@@ -807,7 +804,7 @@ async function submitEliminarProducto(id) {
     closeModal();
     renderProducts();
     updateFavPanel();
-    showToast("Producto eliminado");
+    showToast("🗑️ Producto eliminado");
 
   } catch (err) {
     showToast("❌ No se pudo eliminar el producto");

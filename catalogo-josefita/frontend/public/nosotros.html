@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sobre Nosotros — Variedades Josefita</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+      .nosotros-wrapper {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 3rem 2rem 5rem;
+      }
+
+      .nosotros-header {
+        margin-bottom: 2.5rem;
+        border-bottom: 3px solid var(--dark);
+        padding-bottom: 1rem;
+      }
+
+      .nosotros-header h1 {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 3rem;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+      }
+
+      .nosotros-header p.subtitulo {
+        font-size: 1rem;
+        color: var(--muted);
+      }
+
+      .nosotros-seccion {
+        margin-bottom: 2.5rem;
+      }
+
+      .nosotros-seccion h2 {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 1.6rem;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.8rem;
+        color: var(--dark);
+      }
+
+      .nosotros-seccion p {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #333;
+        margin-bottom: 0.8rem;
+      }
+
+      .valores-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .valor-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.2rem;
+        text-align: center;
+      }
+
+      .valor-card span {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      .valor-card h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+        color: var(--dark);
+      }
+
+      .valor-card p {
+        font-size: 0.85rem;
+        color: var(--muted);
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .btn-volver {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--dark);
+        color: var(--white);
+        border: none;
+        border-radius: var(--radius);
+        padding: 0.65rem 1.4rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background var(--transition);
+        margin-top: 1rem;
+      }
+
+      .btn-volver:hover {
+        background: var(--dark-hover);
+      }
+    </style>
+  </head>
+
+  <body style="background: var(--bg)">
+    <!-- HEADER -->
+    <header style="position: sticky; top: 0; z-index: 100">
+      <div class="brand">Variedades Josefita</div>
+      <a href="index.html" class="btn-volver">← Volver al catálogo</a>
+    </header>
+
+    <div class="nosotros-wrapper">
+      <div class="nosotros-header">
+        <h1>Variedades Josefita</h1>
+        <p class="subtitulo">Calidad, confianza y estilo al alcance de todos</p>
+      </div>
+
+      <!-- QUIÉNES SOMOS -->
+      <div class="nosotros-seccion">
+        <h2>¿Quiénes somos?</h2>
+
+        <p>
+          Variedades Josefita es un emprendimiento familiar dedicado a la venta
+          de ropa de calidad a precios accesibles. Nuestro objetivo es ofrecer a
+          la comunidad una alternativa cercana y económica para adquirir prendas
+          modernas sin necesidad de desplazarse a grandes centros comerciales.
+        </p>
+
+        <p>
+          El negocio nació en noviembre de 2024 gracias a la iniciativa de
+          Belkis Díaz, quien identificó una oportunidad para comercializar ropa
+          importada y brindar productos de excelente calidad a precios
+          competitivos. Desde entonces, hemos crecido gracias a la confianza de
+          nuestros clientes, el trato personalizado y el compromiso de ofrecer
+          siempre la mejor atención.
+        </p>
+
+        <p>
+          Actualmente, Variedades Josefita continúa expandiéndose con la visión
+          de consolidarse como un negocio reconocido en la región y seguir
+          llevando moda, calidad y buenos precios a cada uno de nuestros
+          clientes.
+        </p>
+      </div>
+
+      <!-- MISIÓN -->
+      <div class="nosotros-seccion">
+        <h2>Nuestra misión</h2>
+
+        <p>
+          Ofrecer prendas de vestir de calidad a precios competitivos, brindando
+          a nuestros clientes una opción accesible, confiable y cercana para
+          vestir con estilo. Nos esforzamos por garantizar una atención
+          personalizada, generar ahorro para las familias de nuestra comunidad y
+          mantener relaciones basadas en la confianza y el buen servicio.
+        </p>
+      </div>
+
+      <!-- VISIÓN -->
+      <div class="nosotros-seccion">
+        <h2>Nuestra visión</h2>
+
+        <p>
+          Consolidarnos como un emprendimiento reconocido en la comunidad y sus
+          alrededores por la calidad de nuestros productos, la accesibilidad de
+          nuestros precios y la excelencia en la atención al cliente,
+          proyectándonos hacia la apertura de un local propio y una mayor
+          presencia digital.
+        </p>
+      </div>
+
+      <!-- VALORES -->
+      <div class="nosotros-seccion">
+        <h2>Nuestros valores</h2>
+
+        <div class="valores-grid">
+          <div class="valor-card">
+            <span>✨</span>
+            <h3>Calidad</h3>
+            <p>
+              Seleccionamos cuidadosamente nuestras prendas para ofrecer
+              productos duraderos, cómodos y acordes a las tendencias actuales.
+            </p>
+          </div>
+
+          <div class="valor-card">
+            <span>🤝</span>
+            <h3>Confianza</h3>
+            <p>
+              Construimos relaciones cercanas con nuestros clientes mediante una
+              atención honesta, responsable y transparente.
+            </p>
+          </div>
+
+          <div class="valor-card">
+            <span>💛</span>
+            <h3>Compromiso</h3>
+            <p>
+              Trabajamos cada día para brindar un excelente servicio, mantener
+              precios accesibles y satisfacer las necesidades de nuestra
+              comunidad.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACTO -->
+      <div class="nosotros-seccion">
+        <h2>Contáctanos</h2>
+
+        <p>📞 <strong>+58 414-9772512</strong></p>
+
+        <p>
+          📍 Palotal Parte Alta, Municipio Bolívar, Estado Táchira, Venezuela.
+        </p>
+
+        <p style="color: var(--muted); font-size: 0.9rem">
+          También puedes contactarnos a través de WhatsApp para consultar
+          disponibilidad, tallas y precios de nuestras prendas.
+        </p>
+      </div>
+
+      <a href="index.html" class="btn-volver"> ← Volver al catálogo </a>
+    </div>
+  </body>
+</html>
