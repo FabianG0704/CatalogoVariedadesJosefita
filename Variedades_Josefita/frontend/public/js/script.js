@@ -1,14 +1,14 @@
 // =============================================
 // URL BASE DEL BACKEND (Spring Boot)
 // =============================================
+// API_URL viene de config.js
 
 // =============================================
 // SESIÓN
 // =============================================
-const _sesionGuardada = localStorage.getItem("sesionJosefita");
-let currentUser = _sesionGuardada ? JSON.parse(_sesionGuardada) : null;
+let currentUser  = null;
 let pendingFavId = null;
-let modoModal    = "login"; // "login" | "registro"
+let modoModal    = "login";
 
 // =============================================
 // DATOS DE PRODUCTOS
@@ -41,17 +41,18 @@ async function cargarPrendas() {
     const prendas = await res.json();
 
     products = prendas.map(p => ({
-    id:       p.id,
-    name:     p.nombre,
-    price:    formatearPrecio(p.precio),
-    category: inferirCategoria(p.nombre),
-    gender:   GENERO_MAP[p.sexo?.descripcion] ?? "todos",
-    img:      p.imagen ? `${API_URL}/imagenes/${p.imagen}` : null,
-    talla:    p.talla,
-    color:    p.color,
-    fav:      false,
-    agotado:  p.status?.id === 0  // ← nuevo campo
-}));
+      id:       p.id,
+      name:     p.nombre,
+      price:    formatearPrecio(p.precio),
+      category: inferirCategoria(p.nombre),
+      gender:   GENERO_MAP[p.sexo?.descripcion] ?? "todos",
+      // Si la imagen es una URL completa de Cloudinary la usa directamente,
+      // si no (legacy), la construye con la URL del backend
+      img:      p.imagen
+                  ? (p.imagen.startsWith("http") ? p.imagen : `${API_URL}/imagenes/${p.imagen}`)
+                  : null,
+      fav:      false
+    }));
 
     renderProducts();
   } catch (err) {
@@ -78,7 +79,7 @@ function mostrarErrorConexion() {
     <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#888;">
       <p style="font-size:2rem;">⚠️</p>
       <p>No se pudo conectar con el servidor.</p>
-      <p style="font-size:.9rem;">Verifica que Spring Boot esté corriendo en <strong>localhost:8080</strong>.</p>
+      <p style="font-size:.9rem;">Verifica que Spring Boot esté corriendo en <strong>${API_URL}</strong>.</p>
     </div>`;
 }
 
@@ -99,22 +100,6 @@ function renderProducts() {
   document.getElementById("product-count").textContent =
     `${filtered.length} producto${filtered.length !== 1 ? "s" : ""} disponible${filtered.length !== 1 ? "s" : ""}`;
 
-  // Botón de agregar producto (solo admin)
-  let btnAgregar = document.getElementById("btn-agregar-producto");
-  if (esAdmin) {
-    if (!btnAgregar) {
-      btnAgregar = document.createElement("button");
-      btnAgregar.id = "btn-agregar-producto";
-      btnAgregar.textContent = "＋ Agregar producto";
-      btnAgregar.className = "btn-submit";
-      btnAgregar.style.cssText = "margin:1rem 0; padding:.6rem 1.4rem;";
-      btnAgregar.onclick = abrirModalAgregarProducto;
-      document.getElementById("product-count").insertAdjacentElement("afterend", btnAgregar);
-    }
-  } else {
-    btnAgregar?.remove();
-  }
-  
   if (filtered.length === 0) {
     grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#888;padding:2rem;">
       No hay productos en esta categoría todavía.</p>`;
@@ -133,10 +118,7 @@ function renderProducts() {
                <span style="font-size:2rem;">📷</span> Sin foto
              </div>`
         }
-        ${p.agotado
-          ? `<span class="product-badge" style="background: rgba(120,120,120,0.6);">Agotado</span>`
-          : `<span class="product-badge">${categoryLabels[p.category] ?? p.category}</span>`
-        }
+        <span class="product-badge">${categoryLabels[p.category] ?? p.category}</span>
 
         ${esAdmin ? `
         <div class="upload-overlay" id="overlay-${p.id}">
@@ -156,21 +138,15 @@ function renderProducts() {
         <button class="btn-fav ${p.fav ? "active" : ""}"
           title="${currentUser ? "Guardar en favoritos" : "Inicia sesión para guardar favoritos"}"
           onclick="toggleFav(${p.id})">
-          ${p.fav ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="#c47fa0" stroke="#c47fa0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>` : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`}
+          ${p.fav ? "❤️" : "🤍"}
         </button>
-        ${esAdmin ? `
-        <button class="btn-upload" style="font-size:.8rem;padding:.3rem .7rem;"
-          onclick="abrirModalEditarProducto(${p.id})">✏️ Editar</button>
-        <button class="btn-upload" style="font-size:.8rem;padding:.3rem .7rem;background:#c0392b;"
-          onclick="confirmarEliminar(${p.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Eliminar</button>
-        ` : ""}
       </div>
     </div>
   `).join("");
 }
 
 // =============================================
-// SUBIR FOTO (solo admin)
+// SUBIR FOTO A CLOUDINARY (a través del back)
 // =============================================
 async function subirFoto(event, prendaId) {
   const file = event.target.files[0];
@@ -180,6 +156,7 @@ async function subirFoto(event, prendaId) {
   statusEl.textContent = "Subiendo...";
 
   try {
+    // 1. Subir a Cloudinary a través del backend — devuelve la URL permanente
     const formData = new FormData();
     formData.append("file", file);
 
@@ -188,16 +165,18 @@ async function subirFoto(event, prendaId) {
       body: formData
     });
     if (!resUpload.ok) throw new Error("Error al subir el archivo");
-    const nombreArchivo = await resUpload.text();
+    const urlCloudinary = await resUpload.text();
 
+    // 2. Asociar la URL de Cloudinary a la prenda
     const resAsignar = await fetch(
-      `${API_URL}/api/prendas/${prendaId}/imagen?nombreArchivo=${nombreArchivo}`,
+      `${API_URL}/api/prendas/${prendaId}/imagen?nombreArchivo=${encodeURIComponent(urlCloudinary)}`,
       { method: "PUT" }
     );
     if (!resAsignar.ok) throw new Error("Error al asociar la imagen");
 
+    // 3. Actualizar el array local y re-renderizar
     const producto = products.find(p => p.id === prendaId);
-    producto.img = `${API_URL}/imagenes/${nombreArchivo}`;
+    producto.img = urlCloudinary;
 
     statusEl.textContent = "✅";
     setTimeout(() => {
@@ -232,51 +211,18 @@ function filterGender(gender, btn) {
 // =============================================
 // FAVORITOS
 // =============================================
-// Reemplaza toggleFav
-// Al hacer login/registro, carga los favoritos del usuario desde el backend
-async function cargarFavoritosUsuario() {
-  if (!currentUser) return;
-  try {
-    const res = await fetch(`${API_URL}/api/favoritos/${currentUser.cedula}`);
-    const ids = await res.json(); // [3, 7, 12, ...]
-    products.forEach(p => p.fav = ids.includes(p.id));
-    renderProducts();
-    updateFavPanel();
-  } catch (err) {
-    console.error("No se pudieron cargar los favoritos:", err);
-  }
-}
-
-async function toggleFav(id) {
+function toggleFav(id) {
   if (!currentUser) {
     pendingFavId = id;
     abrirModalLogin();
     return;
   }
   const p = products.find(x => x.id === id);
-  const nuevoEstado = !p.fav;
-
-  try {
-    if (nuevoEstado) {
-      await fetch(`${API_URL}/api/favoritos`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cedula: currentUser.cedula, prendaId: id })
-      });
-    } else {
-      await fetch(`${API_URL}/api/favoritos/${currentUser.cedula}/${id}`, {
-        method: "DELETE"
-      });
-    }
-    p.fav = nuevoEstado;
-    renderProducts();
-    updateFavPanel();
-    showToast(p.fav ? "Añadido a favoritos" : "Eliminado de favoritos");
-  } catch (err) {
-    showToast("❌ Error al actualizar favoritos");
-  }
+  p.fav = !p.fav;
+  renderProducts();
+  updateFavPanel();
+  showToast(p.fav ? "❤️ Añadido a favoritos" : "🤍 Eliminado de favoritos");
 }
-
 
 function toggleFavPanel() {
   const panel = document.getElementById("fav-panel");
@@ -291,8 +237,8 @@ function updateFavPanel() {
   const btnEl   = document.getElementById("fav-header-btn");
 
   btnEl.innerHTML = favProducts.length > 0
-    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="#c47fa0" stroke="#c47fa0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> <span class="fav-count" id="fav-count">${favProducts.length}</span>`
-    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> <span class="fav-count" id="fav-count" style="display:none">0</span>`;
+    ? `❤️ <span class="fav-count" id="fav-count">${favProducts.length}</span>`
+    : `🤍 <span class="fav-count" id="fav-count" style="display:none">0</span>`;
 
   if (favProducts.length === 0) {
     listEl.innerHTML = "";
@@ -308,14 +254,17 @@ function updateFavPanel() {
         <p class="fav-item-name">${p.name}</p>
         <p class="fav-item-price">${p.price}</p>
       </div>
-      <button class="fav-item-remove" onclick="removeFav(${p.id})" title="Quitar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="fav-item-remove" onclick="removeFav(${p.id})" title="Quitar">✕</button>
     </div>
   `).join("");
 }
 
-// Reemplaza removeFav
-async function removeFav(id) {
-  await toggleFav(id); // reutiliza la misma lógica
+function removeFav(id) {
+  const p = products.find(x => x.id === id);
+  p.fav = false;
+  renderProducts();
+  updateFavPanel();
+  showToast("🤍 Eliminado de favoritos");
 }
 
 document.addEventListener("click", function(e) {
@@ -330,7 +279,6 @@ document.addEventListener("click", function(e) {
 function handleLoginBtn() {
   if (currentUser) {
     currentUser = null;
-    localStorage.removeItem("sesionJosefita");
     products.forEach(p => p.fav = false);
     updateLoginBtn();
     updateFavPanel();
@@ -361,7 +309,6 @@ function renderModal() {
     body.innerHTML = `
       <div class="modal-title">Iniciar sesión</div>
       <p class="modal-sub">Inicia sesión para guardar tus favoritos</p>
-
       <div class="form-group">
         <label>Correo</label>
         <input type="email" id="modal-correo" placeholder="correo@ejemplo.com" autocomplete="off"
@@ -372,9 +319,7 @@ function renderModal() {
         <input type="password" id="modal-password" placeholder="••••••••"
                onkeydown="if(event.key==='Enter') submitLogin()" />
       </div>
-
       <p class="modal-error" id="modal-error"></p>
-
       <div class="modal-actions">
         <button class="btn-submit" onclick="submitLogin()">Entrar</button>
         <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
@@ -388,7 +333,6 @@ function renderModal() {
     body.innerHTML = `
       <div class="modal-title">Crear cuenta</div>
       <p class="modal-sub">Regístrate para guardar tus favoritos</p>
-
       <div class="form-group">
         <label>Nombre completo</label>
         <input type="text" id="modal-nombre" placeholder="Tu nombre" />
@@ -421,9 +365,7 @@ function renderModal() {
           <option value="O">Otro</option>
         </select>
       </div>
-
       <p class="modal-error" id="modal-error"></p>
-
       <div class="modal-actions">
         <button class="btn-submit" onclick="submitRegistro()">Registrarme</button>
         <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
@@ -445,17 +387,12 @@ function closeModalOutside(e) {
   if (e.target === document.getElementById("modal-overlay")) closeModal();
 }
 
-// LOGIN contra la API
 async function submitLogin() {
   const correo   = document.getElementById("modal-correo")?.value.trim();
   const password = document.getElementById("modal-password")?.value;
   const errorEl  = document.getElementById("modal-error");
 
-  if (!correo || !password) {
-    errorEl.textContent = "Por favor completa todos los campos.";
-    return;
-  }
-
+  if (!correo || !password) { errorEl.textContent = "Por favor completa todos los campos."; return; }
   errorEl.textContent = "Verificando...";
 
   try {
@@ -464,31 +401,20 @@ async function submitLogin() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ correo, password })
     });
-
     const data = await res.json();
+    if (!res.ok) { errorEl.textContent = "❌ " + data.error; return; }
 
-    if (!res.ok) {
-      errorEl.textContent = "❌ " + data.error;
-      return;
-    }
-
-    // Login exitoso
     currentUser = data;
-    localStorage.setItem("sesionJosefita", JSON.stringify(data)); 
     closeModal();
     updateLoginBtn();
     renderProducts();
-    await cargarFavoritosUsuario();
     showToast(`✅ ¡Bienvenido, ${currentUser.nombre}!`);
-
     if (pendingFavId !== null) { toggleFav(pendingFavId); pendingFavId = null; }
-
   } catch (err) {
     errorEl.textContent = "❌ No se pudo conectar con el servidor.";
   }
 }
 
-// REGISTRO contra la API
 async function submitRegistro() {
   const nombre    = document.getElementById("modal-nombre")?.value.trim();
   const cedula    = document.getElementById("modal-cedula")?.value.trim();
@@ -500,10 +426,8 @@ async function submitRegistro() {
   const errorEl   = document.getElementById("modal-error");
 
   if (!nombre || !cedula || !correo || !password || !celular || !direccion) {
-    errorEl.textContent = "Por favor completa todos los campos.";
-    return;
+    errorEl.textContent = "Por favor completa todos los campos."; return;
   }
-
   errorEl.textContent = "Registrando...";
 
   try {
@@ -512,25 +436,15 @@ async function submitRegistro() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, cedula, correo, password, celular, direccion, sexoId })
     });
-
     const data = await res.json();
+    if (!res.ok) { errorEl.textContent = "❌ " + data.error; return; }
 
-    if (!res.ok) {
-      errorEl.textContent = "❌ " + data.error;
-      return;
-    }
-
-    // Registro exitoso → sesión automática
     currentUser = data;
-    localStorage.setItem("sesionJosefita", JSON.stringify(data)); 
     closeModal();
     updateLoginBtn();
     renderProducts();
-    await cargarFavoritosUsuario();
     showToast(`✅ ¡Cuenta creada! Bienvenido, ${currentUser.nombre}!`);
-
     if (pendingFavId !== null) { toggleFav(pendingFavId); pendingFavId = null; }
-
   } catch (err) {
     errorEl.textContent = "❌ No se pudo conectar con el servidor.";
   }
@@ -558,267 +472,6 @@ function showToast(msg) {
 }
 
 // =============================================
-// MODAL — AGREGAR PRODUCTO (solo admin)
-// =============================================
-function abrirModalAgregarProducto() {
-  const body = document.getElementById("modal-body");
-  body.innerHTML = `
-    <div class="modal-title">➕ Agregar producto</div>
-
-    <div class="form-group">
-      <label>Nombre</label>
-      <input type="text" id="ap-nombre" placeholder="Ej: Camiseta básica blanca" />
-    </div>
-    <div class="form-group">
-      <label>Precio</label>
-      <input type="number" id="ap-precio" placeholder="Ej: 35000" />
-    </div>
-    <div class="form-group">
-      <label>Talla</label>
-      <select id="ap-talla">
-        <option>XS</option><option>S</option><option selected>M</option>
-        <option>L</option><option>XL</option><option>XXL</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Color</label>
-      <input type="text" id="ap-color" placeholder="Ej: Rojo" />
-    </div>
-    <div class="form-group">
-      <label>Género</label>
-      <select id="ap-sexo">
-        <option value="M">Masculino</option>
-        <option value="F">Femenino</option>
-        <option value="O">Otro</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Foto (opcional)</label>
-      <input type="file" id="ap-foto" accept="image/*" />
-    </div>
-
-    <p class="modal-error" id="ap-error"></p>
-
-    <div class="modal-actions">
-      <button class="btn-submit" onclick="submitAgregarProducto()">Guardar</button>
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-    </div>
-  `;
-  document.getElementById("modal-overlay").classList.add("open");
-}
-
-async function submitAgregarProducto() {
-  const nombre  = document.getElementById("ap-nombre")?.value.trim();
-  const precio  = document.getElementById("ap-precio")?.value;
-  const talla   = document.getElementById("ap-talla")?.value;
-  const color   = document.getElementById("ap-color")?.value.trim();
-  const sexoId  = document.getElementById("ap-sexo")?.value;
-  const fotoEl  = document.getElementById("ap-foto");
-  const errorEl = document.getElementById("ap-error");
-
-  if (!nombre || !precio || !color) {
-    errorEl.textContent = "Nombre, precio y color son obligatorios.";
-    return;
-  }
-
-  errorEl.textContent = "Guardando...";
-
-  try {
-    // 1. Crear la prenda
-    const res = await fetch(`${API_URL}/api/prendas`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre,
-        precio: parseFloat(precio),
-        talla,
-        color,
-        sexo:   { id: sexoId },
-        status: { id: 1 }
-      })
-    });
-
-    if (!res.ok) throw new Error("Error al crear la prenda");
-    const nuevaPrenda = await res.json();
-
-    // 2. Si hay foto, subirla y asociarla
-    const file = fotoEl?.files[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const resUpload = await fetch(`${API_URL}/api/prendas/upload`, {
-        method: "POST", body: formData
-      });
-      if (resUpload.ok) {
-        const nombreArchivo = await resUpload.text();
-        await fetch(`${API_URL}/api/prendas/${nuevaPrenda.id}/imagen?nombreArchivo=${nombreArchivo}`,
-          { method: "PUT" });
-        nuevaPrenda.imagen = nombreArchivo;
-      }
-    }
-
-    // 3. Agregar al array local y renderizar sin recargar
-    products.push({
-      id:       nuevaPrenda.id,
-      name:     nuevaPrenda.nombre,
-      price:    formatearPrecio(nuevaPrenda.precio),
-      category: inferirCategoria(nuevaPrenda.nombre),
-      gender:   GENERO_MAP[nuevaPrenda.sexo?.descripcion] ?? "todos",
-      img:      nuevaPrenda.imagen ? `${API_URL}/imagenes/${nuevaPrenda.imagen}` : null,
-      fav:      false,
-      talla:    nuevaPrenda.talla,   // ← nuevo
-      color:    nuevaPrenda.color    // ← nuevo
-    });
-    closeModal();
-    renderProducts();
-    showToast("✅ Producto agregado correctamente");
-
-  } catch (err) {
-    errorEl.textContent = "❌ Error: " + err.message;
-  }
-}
-
-// =============================================
-// MODAL — EDITAR PRODUCTO (solo admin)
-// =============================================
-function abrirModalEditarProducto(id) {
-  const p = products.find(x => x.id === id);
-  const body = document.getElementById("modal-body");
-  body.innerHTML = `
-    <div class="modal-title">✏️ Editar producto</div>
-
-    <div class="form-group">
-      <label>Nombre</label>
-      <input type="text" id="ep-nombre" value="${p.name}" />
-    </div>
-    <div class="form-group">
-      <label>Precio</label>
-      <input type="number" id="ep-precio"
-        value="${p.price.replace(/[$.,]/g, "").replace(/\./g, "")}" />
-    </div>
-    <div class="form-group">
-      <label>Talla</label>
-      <select id="ep-talla">
-        ${["XS","S","M","L","XL","XXL"].map(t =>
-          `<option ${p.talla === t ? "selected" : ""}>${t}</option>`
-        ).join("")}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Color</label>
-      <input type="text" id="ep-color" value="${p.color ?? ""}" />
-    </div>
-    <div class="form-group">
-      <label>Género</label>
-      <select id="ep-sexo">
-        <option value="M" ${p.gender==="hombres"?"selected":""}>Masculino</option>
-        <option value="F" ${p.gender==="mujeres"?"selected":""}>Femenino</option>
-        <option value="O" ${p.gender==="todos"?"selected":""}>Otro</option>
-      </select>
-    </div>
-
-    <p class="modal-error" id="ep-error"></p>
-
-    <div class="modal-actions">
-      <button class="btn-submit" onclick="submitEditarProducto(${id})">Guardar cambios</button>
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-    </div>
-  `;
-  document.getElementById("modal-overlay").classList.add("open");
-}
-
-async function submitEditarProducto(id) {
-  const nombre  = document.getElementById("ep-nombre")?.value.trim();
-  const precio  = document.getElementById("ep-precio")?.value;
-  const talla   = document.getElementById("ep-talla")?.value;
-  const color   = document.getElementById("ep-color")?.value.trim();
-  const sexoId  = document.getElementById("ep-sexo")?.value;
-  const errorEl = document.getElementById("ep-error");
-
-  if (!nombre || !precio || !color) {
-    errorEl.textContent = "Nombre, precio y color son obligatorios.";
-    return;
-  }
-
-  errorEl.textContent = "Guardando...";
-
-  try {
-    const res = await fetch(`${API_URL}/api/prendas/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre,
-        precio: parseFloat(precio),
-        talla,
-        color,
-        sexo:   { id: sexoId },
-        status: { id: 1 }
-      })
-    });
-
-    if (!res.ok) throw new Error("Error al actualizar");
-
-    // Actualiza el array local
-    const p = products.find(x => x.id === id);
-    p.name     = nombre;
-    p.price    = formatearPrecio(parseFloat(precio));
-    p.category = inferirCategoria(nombre);
-    p.gender   = { M: "hombres", F: "mujeres", O: "todos" }[sexoId];
-    p.talla    = talla;
-    p.color    = color;
-
-    closeModal();
-    renderProducts();
-    showToast("✅ Producto actualizado");
-
-  } catch (err) {
-    errorEl.textContent = "❌ " + err.message;
-  }
-}
-
-// =============================================
-// ELIMINAR PRODUCTO (solo admin)
-// =============================================
-function confirmarEliminar(id) {
-  const p = products.find(x => x.id === id);
-  const body = document.getElementById("modal-body");
-  body.innerHTML = `
-    <div class="modal-title">Eliminar producto</div>
-    <p style="text-align:center;margin:1rem 0;">
-      ¿Segura que deseas eliminar <strong>${p.name}</strong>?<br>
-      <span style="color:#888;font-size:.9rem;">Esta acción no se puede deshacer.</span>
-    </p>
-    <div class="modal-actions">
-      <button class="btn-submit" style="background:#c0392b;"
-        onclick="submitEliminarProducto(${id})">Sí, eliminar</button>
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-    </div>
-  `;
-  document.getElementById("modal-overlay").classList.add("open");
-}
-
-async function submitEliminarProducto(id) {
-  try {
-    const res = await fetch(`${API_URL}/api/prendas/${id}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Error al eliminar");
-
-    products = products.filter(x => x.id !== id);
-    closeModal();
-    renderProducts();
-    updateFavPanel();
-    showToast("Producto eliminado");
-
-  } catch (err) {
-    showToast("❌ No se pudo eliminar el producto");
-  }
-}
-
-// =============================================
 // INIT
 // =============================================
-(async () => {
-  cargarPrendas();
-  updateLoginBtn();
-  await cargarFavoritosUsuario();
-})();
+cargarPrendas();

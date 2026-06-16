@@ -2,7 +2,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/bdjosefita}
     username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:Ol4kases}
+    password: ${DB_PASSWORD:tupassword}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -16,8 +16,8 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
-# En local usa ./imagenes (carpeta al lado del JAR)
-# En Render/Docker usa /app/imagenes (creada en el Dockerfile)
-app:
-  imagenes:
-    ruta: ${IMAGENES_RUTA:./imagenes}
+# Cloudinary - las credenciales reales van en las variables de entorno de Render
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:tu_cloud_name}
+  api-key: ${CLOUDINARY_API_KEY:tu_api_key}
+  api-secret: ${CLOUDINARY_API_SECRET:tu_api_secret}
