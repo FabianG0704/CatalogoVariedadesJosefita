@@ -179,10 +179,8 @@ async function subirFoto(event, prendaId) {
     producto.img = urlCloudinary;
 
     statusEl.textContent = "✅";
-    setTimeout(() => {
-      renderProducts();
-      showToast("📷 Foto actualizada correctamente");
-    }, 800);
+    renderProducts();  // ← sin setTimeout, inmediato
+    showToast("📷 Foto actualizada correctamente");
 
   } catch (err) {
     console.error(err);
