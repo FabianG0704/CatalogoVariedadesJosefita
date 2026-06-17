@@ -91,7 +91,7 @@ public class PrendaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // DELETE /api/prendas/{id} → eliminación lógica
+    // DELETE /api/prendas/{id} → eliminación lógica como debe ser
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         return prendaService.buscarPorId(id)
