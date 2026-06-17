@@ -17,10 +17,10 @@ public class PrendaService {
     private PrendaRepository prendaRepository;
 
     @Autowired
-    private StatusRepository statusRepository;  // ← NUEVO
+    private StatusRepository statusRepository; // ← NUEVO
 
     public List<Prenda> listarTodas() {
-        return prendaRepository.findAll();
+        return prendaRepository.findByStatusIdNot(0);
     }
 
     public Prenda guardar(Prenda prenda) {
@@ -33,7 +33,7 @@ public class PrendaService {
 
     public void eliminar(Integer id) {
         buscarPorId(id).ifPresent(prenda -> {
-            Status inactivo = statusRepository.findById(0)  // ← carga el registro real de la BD
+            Status inactivo = statusRepository.findById(0) // ← carga el registro real de la BD
                     .orElseThrow(() -> new RuntimeException("Status 0 no existe en tmstatus"));
             prenda.setStatus(inactivo);
             prendaRepository.save(prenda);
