@@ -30,6 +30,14 @@ const categoryLabels = {
 
 let activeCategory = "todos";
 let activeGender   = "todos";
+let adminProductModalMode = null;
+let editingPrendaId = null;
+
+const SEXO_OPTIONS = [
+  { id: "M", label: "Masculino" },
+  { id: "F", label: "Femenino" },
+  { id: "O", label: "Otro" }
+];
 
 // =============================================
 // CARGA INICIAL DESDE LA API
@@ -43,11 +51,14 @@ async function cargarPrendas() {
     products = prendas.map(p => ({
       id:       p.id,
       name:     p.nombre,
+      rawPrice: p.precio,
       price:    formatearPrecio(p.precio),
       category: inferirCategoria(p.nombre),
       gender:   GENERO_MAP[p.sexo?.descripcion] ?? "todos",
-      // Si la imagen es una URL completa de Cloudinary la usa directamente,
-      // si no (legacy), la construye con la URL del backend
+      sexoId:   p.sexo?.id ?? "M",
+      talla:    p.talla,
+      color:    p.color,
+      imagen:   p.imagen,
       img:      p.imagen
                   ? (p.imagen.startsWith("http") ? p.imagen : `${API_URL}/imagenes/${p.imagen}`)
                   : null,
@@ -100,6 +111,22 @@ function renderProducts() {
   document.getElementById("product-count").textContent =
     `${filtered.length} producto${filtered.length !== 1 ? "s" : ""} disponible${filtered.length !== 1 ? "s" : ""}`;
 
+  // Botón de agregar producto (solo admin)
+  let btnAgregar = document.getElementById("btn-agregar-producto");
+  if (esAdmin) {
+    if (!btnAgregar) {
+      btnAgregar = document.createElement("button");
+      btnAgregar.id = "btn-agregar-producto";
+      btnAgregar.textContent = "＋ Agregar producto";
+      btnAgregar.className = "btn-submit";
+      btnAgregar.style.cssText = "margin:1rem 0; padding:.6rem 1.4rem;";
+      btnAgregar.onclick = abrirModalAgregarProducto;
+      document.getElementById("product-count").insertAdjacentElement("afterend", btnAgregar);
+    }
+  } else {
+    btnAgregar?.remove();
+  }
+
   if (filtered.length === 0) {
     grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#888;padding:2rem;">
       No hay productos en esta categoría todavía.</p>`;
@@ -140,9 +167,196 @@ function renderProducts() {
           onclick="toggleFav(${p.id})">
           ${p.fav ? "❤️" : "🤍"}
         </button>
+        ${esAdmin ? `
+        <button class="btn-upload" style="font-size:.8rem;padding:.3rem .7rem;margin-left:.5rem;"
+          onclick="abrirModalEditarProducto(${p.id})">✏️ Editar</button>
+        <button class="btn-upload" style="font-size:.8rem;padding:.3rem .7rem;margin-left:.4rem;background:#c0392b;"
+          onclick="confirmarEliminar(${p.id})">❌ Eliminar</button>
+        ` : ""}
       </div>
     </div>
   `).join("");
+}
+
+function abrirModalAgregarProducto() {
+  adminProductModalMode = "agregar";
+  editingPrendaId = null;
+  renderProductoModal();
+  document.getElementById("modal-overlay").classList.add("open");
+  setTimeout(() => document.getElementById("modal-nombre")?.focus(), 100);
+}
+
+function abrirModalEditarProducto(id) {
+  adminProductModalMode = "editar";
+  editingPrendaId = id;
+  renderProductoModal();
+  document.getElementById("modal-overlay").classList.add("open");
+  setTimeout(() => document.getElementById("modal-nombre")?.focus(), 100);
+}
+
+function confirmarEliminar(id) {
+  if (!confirm("¿Deseas eliminar este producto?")) return;
+  eliminarProducto(id);
+}
+
+async function eliminarProducto(id) {
+  try {
+    const res = await fetch(`${API_URL}/api/prendas/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("No se pudo eliminar el producto.");
+    products = products.filter(p => p.id !== id);
+    renderProducts();
+    showToast("✅ Producto eliminado");
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Error al eliminar el producto");
+  }
+}
+
+function renderProductoModal() {
+  const body = document.getElementById("modal-body");
+  const esAdmin = currentUser?.esAdmin === true;
+  if (!esAdmin) {
+    body.innerHTML = `<p>No autorizado.</p>`;
+    return;
+  }
+
+  const isEditar = adminProductModalMode === "editar";
+  const producto = isEditar ? products.find(p => p.id === editingPrendaId) : null;
+  const nombre = producto?.name ?? "";
+  const talla = producto?.talla ?? "";
+  const color = producto?.color ?? "";
+  const precio = producto?.rawPrice ?? "";
+  const sexoId = producto?.sexoId ?? "M";
+
+  body.innerHTML = `
+    <div class="modal-title">${isEditar ? "Editar producto" : "Agregar producto"}</div>
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" id="modal-nombre" value="${nombre}" />
+    </div>
+    <div class="form-group">
+      <label>Talla</label>
+      <input type="text" id="modal-talla" value="${talla}" />
+    </div>
+    <div class="form-group">
+      <label>Color</label>
+      <input type="text" id="modal-color" value="${color}" />
+    </div>
+    <div class="form-group">
+      <label>Precio</label>
+      <input type="number" id="modal-precio" step="0.01" value="${precio}" />
+    </div>
+    <div class="form-group">
+      <label>Género</label>
+      <select id="modal-sexo">
+        ${SEXO_OPTIONS.map(option => `
+          <option value="${option.id}" ${sexoId === option.id ? "selected" : ""}>
+            ${option.label}
+          </option>
+        `).join("")}
+      </select>
+    </div>
+    <p style="font-size:.85rem;color:#666;margin-bottom:1rem;">
+      La imagen se puede asignar luego con el botón de subir foto.
+    </p>
+    <p class="modal-error" id="modal-producto-error"></p>
+    <div class="modal-actions">
+      <button class="btn-submit" onclick="submitProductoModal()">
+        ${isEditar ? "Guardar cambios" : "Agregar producto"}
+      </button>
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+    </div>
+  `;
+}
+
+async function submitProductoModal() {
+  const nombre = document.getElementById("modal-nombre")?.value.trim();
+  const talla = document.getElementById("modal-talla")?.value.trim();
+  const color = document.getElementById("modal-color")?.value.trim();
+  const precio = document.getElementById("modal-precio")?.value.trim();
+  const sexoId = document.getElementById("modal-sexo")?.value;
+  const errorEl = document.getElementById("modal-producto-error");
+
+  if (!nombre || !talla || !color || !precio) {
+    errorEl.textContent = "Por favor completa todos los campos.";
+    return;
+  }
+
+  const body = {
+    nombre,
+    talla,
+    color,
+    precio: Number(precio),
+    sexo: { id: sexoId }
+  };
+
+  if (adminProductModalMode === "agregar") {
+    body.status = { id: 1 };
+  }
+
+  try {
+    const url = adminProductModalMode === "editar"
+      ? `${API_URL}/api/prendas/${editingPrendaId}`
+      : `${API_URL}/api/prendas`;
+    const method = adminProductModalMode === "editar" ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.textContent = data.error || "Error al guardar el producto.";
+      return;
+    }
+
+    if (adminProductModalMode === "editar") {
+      const index = products.findIndex(p => p.id === data.id);
+      if (index >= 0) {
+        products[index] = {
+          ...products[index],
+          name: data.nombre,
+          talla: data.talla,
+          color: data.color,
+          rawPrice: data.precio,
+          price: formatearPrecio(data.precio),
+          sexoId: data.sexo?.id ?? products[index].sexoId,
+          gender: GENERO_MAP[data.sexo?.descripcion] ?? products[index].gender,
+          imagen: data.imagen ?? products[index].imagen,
+          img: data.imagen
+            ? (data.imagen.startsWith("http") ? data.imagen : `${API_URL}/imagenes/${data.imagen}`)
+            : products[index].img
+        };
+      }
+      showToast("✅ Producto actualizado");
+    } else {
+      products.unshift({
+        id: data.id,
+        name: data.nombre,
+        rawPrice: data.precio,
+        price: formatearPrecio(data.precio),
+        category: inferirCategoria(data.nombre),
+        gender: GENERO_MAP[data.sexo?.descripcion] ?? "todos",
+        sexoId: data.sexo?.id ?? "M",
+        talla: data.talla,
+        color: data.color,
+        imagen: data.imagen,
+        img: data.imagen
+          ? (data.imagen.startsWith("http") ? data.imagen : `${API_URL}/imagenes/${data.imagen}`)
+          : null,
+        fav: false
+      });
+      showToast("✅ Producto agregado");
+    }
+
+    closeModal();
+    renderProducts();
+  } catch (err) {
+    console.error(err);
+    errorEl.textContent = "❌ Ocurrió un error al guardar el producto.";
+  }
 }
 
 // =============================================
