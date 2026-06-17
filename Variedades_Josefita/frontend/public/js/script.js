@@ -66,6 +66,9 @@ async function cargarPrendas() {
     }));
 
     renderProducts();
+    if (currentUser) {
+      await cargarFavoritos(currentUser.cedula);
+    }
   } catch (err) {
     console.error("No se pudo conectar con el backend:", err);
     mostrarErrorConexion();
@@ -429,11 +432,48 @@ function toggleFav(id) {
     abrirModalLogin();
     return;
   }
+
   const p = products.find(x => x.id === id);
-  p.fav = !p.fav;
+  const nuevoEstado = !p.fav;
+  p.fav = nuevoEstado;
   renderProducts();
   updateFavPanel();
-  showToast(p.fav ? "❤️ Añadido a favoritos" : "🤍 Eliminado de favoritos");
+  showToast(nuevoEstado ? "❤️ Añadido a favoritos" : "🤍 Eliminado de favoritos");
+
+  persistFavorite(currentUser.cedula, id, nuevoEstado);
+}
+
+async function persistFavorite(cedula, prendaId, agregar) {
+  try {
+    if (agregar) {
+      await fetch(`${API_URL}/api/favoritos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cedula, prendaId })
+      });
+    } else {
+      await fetch(`${API_URL}/api/favoritos/${cedula}/${prendaId}`, {
+        method: "DELETE"
+      });
+    }
+  } catch (err) {
+    console.error("Error al persistir favorito:", err);
+  }
+}
+
+async function cargarFavoritos(cedula) {
+  try {
+    const res = await fetch(`${API_URL}/api/favoritos/${cedula}`);
+    if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+    const favoritos = await res.json();
+    products.forEach(p => {
+      p.fav = favoritos.includes(p.id);
+    });
+    renderProducts();
+    updateFavPanel();
+  } catch (err) {
+    console.error("No se pudieron cargar favoritos:", err);
+  }
 }
 
 function toggleFavPanel() {
@@ -491,6 +531,7 @@ document.addEventListener("click", function(e) {
 function handleLoginBtn() {
   if (currentUser) {
     currentUser = null;
+    localStorage.removeItem("currentUser");
     products.forEach(p => p.fav = false);
     updateLoginBtn();
     updateFavPanel();
@@ -590,9 +631,9 @@ function renderModal() {
   }
 }
 
-function closeModal() {
+function closeModal(clearPending = true) {
   document.getElementById("modal-overlay").classList.remove("open");
-  pendingFavId = null;
+  if (clearPending) pendingFavId = null;
 }
 
 function closeModalOutside(e) {
@@ -617,11 +658,13 @@ async function submitLogin() {
     if (!res.ok) { errorEl.textContent = "❌ " + data.error; return; }
 
     currentUser = data;
-    closeModal();
+    closeModal(false);
     updateLoginBtn();
+    await cargarFavoritos(currentUser.cedula);
     renderProducts();
     showToast(`✅ ¡Bienvenido, ${currentUser.nombre}!`);
     if (pendingFavId !== null) { toggleFav(pendingFavId); pendingFavId = null; }
+    guardarSesion();
   } catch (err) {
     errorEl.textContent = "❌ No se pudo conectar con el servidor.";
   }
@@ -652,11 +695,13 @@ async function submitRegistro() {
     if (!res.ok) { errorEl.textContent = "❌ " + data.error; return; }
 
     currentUser = data;
-    closeModal();
+    closeModal(false);
     updateLoginBtn();
+    await cargarFavoritos(currentUser.cedula);
     renderProducts();
     showToast(`✅ ¡Cuenta creada! Bienvenido, ${currentUser.nombre}!`);
     if (pendingFavId !== null) { toggleFav(pendingFavId); pendingFavId = null; }
+    guardarSesion();
   } catch (err) {
     errorEl.textContent = "❌ No se pudo conectar con el servidor.";
   }
@@ -673,6 +718,26 @@ function updateLoginBtn() {
   }
 }
 
+function guardarSesion() {
+  if (currentUser) {
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+  } else {
+    localStorage.removeItem("currentUser");
+  }
+}
+
+function cargarSesion() {
+  const raw = localStorage.getItem("currentUser");
+  if (!raw) return;
+  try {
+    currentUser = JSON.parse(raw);
+    updateLoginBtn();
+  } catch (err) {
+    console.error("Error al cargar la sesión:", err);
+    localStorage.removeItem("currentUser");
+  }
+}
+
 // =============================================
 // TOAST
 // =============================================
@@ -686,4 +751,7 @@ function showToast(msg) {
 // =============================================
 // INIT
 // =============================================
+
+cargarSesion();
+
 cargarPrendas();
